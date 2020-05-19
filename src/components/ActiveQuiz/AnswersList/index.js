@@ -2,7 +2,7 @@ import React from 'react';
 import classes from './index.module.css';
 import AnswerItem from "./AnswerItem";
 
-const AnswersList = ({ answers, onAnswerClick }) => {
+const AnswersList = ({ answers, onAnswerClick, state }) => {
     return (
         <ul className={classes.AnswersList}>
             {
@@ -12,6 +12,7 @@ const AnswersList = ({ answers, onAnswerClick }) => {
                             key={index}
                             answer={item}
                             onAnswerClick={onAnswerClick}
+                            state={state ? state[item.id] : null}
                         />
                     )
 
