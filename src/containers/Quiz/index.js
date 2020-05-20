@@ -5,7 +5,8 @@ import FinishedQuiz from '../../components/FinishedQuiz';
 
 class Quiz extends React.Component {
     state = {
-        isFinished: true,
+        results: {},
+        isFinished: false,
         activeQuestion: 0,
         answerState: null,
         quiz: [
@@ -39,26 +40,42 @@ class Quiz extends React.Component {
         return activeQuestion + 1 === quiz.length
     }
 
+    onRetryHandler = () => {
+        this.setState({
+            results: {},
+            isFinished: false,
+            activeQuestion: 0,
+            answerState: null,
+        })
+    }
+
     onAnswerClickHandler = (answerId) => {
-        const {activeQuestion, quiz, answerState} = this.state;
+        const {activeQuestion, quiz, answerState, results} = this.state;
         const question = quiz[activeQuestion];
+        const resultsObj = {...results};
 
         if (answerState) {
             const key = Object.keys(answerState)[0];
             if (answerState[key] === 'success') {
-                return
+                return;
             }
         }
 
         if (question.rightAnswerId === answerId) {
+            if (!resultsObj[question.id ]) {
+                resultsObj[question.id] = 'success';
+            } else {
+
+            }
             this.setState({
-                answerState: {[answerId]: 'success'}
+                answerState: {[answerId]: 'success'},
+                results: resultsObj,
             })
 
             const timeout = setTimeout(() => {
                 if (this.isQuizFinished()) {
                     this.setState({
-                        isFinished: true
+                        isFinished: true,
                     })
                 } else {
                     this.setState({
@@ -69,23 +86,27 @@ class Quiz extends React.Component {
                 clearTimeout(timeout)
             }, 1000)
         } else {
+            resultsObj[question.id] = 'error'
             this.setState({
-                answerState: {[answerId]: 'error'}
+                answerState: {[answerId]: 'error'},
+                results: resultsObj,
             })
         }
-
-
     }
 
     render() {
-        const {quiz, activeQuestion, answerState, isFinished} = this.state;
+        const {quiz, activeQuestion, answerState, isFinished, results} = this.state;
         return (
             <div className={classes.Quiz}>
                 <div className={classes.QuizWrapper}>
                     <h1>Answer the question</h1>
                     {
                         isFinished ?
-                            <FinishedQuiz />
+                            <FinishedQuiz
+                                results={results}
+                                quiz={quiz}
+                                onRetry={this.onRetryHandler}
+                            />
                             :
                             <ActiveQuiz
                                 answers={quiz[activeQuestion].answers}
